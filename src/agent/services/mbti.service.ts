@@ -14,8 +14,14 @@ import { AgentExecutor, createOpenAIToolsAgent } from 'langchain/agents';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import { RunnableWithMessageHistory } from '@langchain/core/runnables';
 
+import {
+  DASHSCOPE_COMPATIBLE_BASE_URL,
+  requireDashscopeApiKey,
+} from 'src/dashscope-config';
+
 @Injectable()
 export class MbtiService {
+  private readonly dashscopeApiKey = requireDashscopeApiKey();
   private mbtiInfo: Record<string, string>;
   private mbtiList: [string, ...string[]];
   private agentWithChatHistory: RunnableWithMessageHistory<any, any>;
@@ -68,9 +74,9 @@ export class MbtiService {
     ]);
 
     const model = new ChatOpenAI({
-      openAIApiKey: 'sk-839c413f949049918615290813173f2f',
+      openAIApiKey: this.dashscopeApiKey,
       configuration: {
-        baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        baseURL: DASHSCOPE_COMPATIBLE_BASE_URL,
       },
       modelName: 'qwen-plus',
       temperature: 0.4,
@@ -123,9 +129,9 @@ export class MbtiService {
     ]);
 
     const llm = new ChatOpenAI({
-      openAIApiKey: 'sk-839c413f949049918615290813173f2f',
+      openAIApiKey: this.dashscopeApiKey,
       configuration: {
-        baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        baseURL: DASHSCOPE_COMPATIBLE_BASE_URL,
       },
       modelName: 'qwen-plus',
       temperature: 0.4,

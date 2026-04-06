@@ -32,12 +32,26 @@ export class EmailService {
       throw new Error('邮件服务未初始化');
     }
 
+    const fromAddress =
+      this.configService.get<string>('nodemailer_from_address')?.trim() ||
+      this.configService.get<string>('nodemailer_auth_user')?.trim() ||
+      '';
+    const fromName =
+      this.configService.get<string>('nodemailer_from_name')?.trim() ||
+      'AI对话平台';
+
+    if (!fromAddress) {
+      throw new Error(
+        '未配置发件人邮箱：请设置 nodemailer_auth_user 或 nodemailer_from_address',
+      );
+    }
+
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       await this.transporter.sendMail({
         from: {
-          name: 'AI对话平台',
-          address: '2934610933@qq.com',
+          name: fromName,
+          address: fromAddress,
         },
         to,
         subject,

@@ -8,6 +8,7 @@ import { Runnable } from '@langchain/core/runnables';
 import { AgentType } from './entities/agent.entity';
 import { GenerateContentDto } from './dto/create-agent.dto';
 import { ChainValues } from '@langchain/core/utils/types';
+import { DASHSCOPE_COMPATIBLE_BASE_URL, requireDashscopeApiKey } from 'src/dashscope-config';
 import { MbtiService } from './services/mbti.service';
 
 @Injectable()
@@ -21,9 +22,9 @@ export class AgentService {
   constructor(private readonly mbtiService: MbtiService) {
     // 初始化LangChain模型
     this.llm = new ChatOpenAI({
-      openAIApiKey: 'sk-839c413f949049918615290813173f2f',
+      openAIApiKey: requireDashscopeApiKey(),
       configuration: {
-        baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        baseURL: DASHSCOPE_COMPATIBLE_BASE_URL,
       },
       modelName: 'qwen-long',
       temperature: 0.8,

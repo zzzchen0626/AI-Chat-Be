@@ -22,6 +22,11 @@ import {
 } from '../dto/rag.dto';
 import { Runnable } from '@langchain/core/runnables';
 
+import {
+  DASHSCOPE_COMPATIBLE_BASE_URL,
+  requireDashscopeApiKey,
+} from 'src/dashscope-config';
+
 interface DocumentWithMetadata extends Document {
   metadata: {
     id?: string;
@@ -50,21 +55,22 @@ export class RagService {
   }
 
   private async initializeService() {
+    const apiKey = requireDashscopeApiKey();
     try {
       // 初始化嵌入模型
       this.embeddings = new OpenAIEmbeddings({
-        openAIApiKey: 'sk-839c413f949049918615290813173f2f',
+        openAIApiKey: apiKey,
         configuration: {
-          baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+          baseURL: DASHSCOPE_COMPATIBLE_BASE_URL,
         },
         modelName: 'text-embedding-v1',
       });
 
       // 初始化LLM
       this.llm = new ChatOpenAI({
-        openAIApiKey: 'sk-839c413f949049918615290813173f2f',
+        openAIApiKey: apiKey,
         configuration: {
-          baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+          baseURL: DASHSCOPE_COMPATIBLE_BASE_URL,
         },
         modelName: 'qwen-long',
         temperature: 0.1,

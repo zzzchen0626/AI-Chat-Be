@@ -3,6 +3,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Injectable } from '@nestjs/common';
 import { BASE_URL } from 'src/constant';
+import {
+  DASHSCOPE_COMPATIBLE_BASE_URL,
+  requireDashscopeApiKey,
+} from 'src/dashscope-config';
 import { isImageByExtension } from 'src/util';
 
 @Injectable()
@@ -12,9 +16,8 @@ export class AiService {
 
   constructor() {
     this.openai = new OpenAI({
-      // 若没有配置环境变量，请用阿里云百炼API Key将下行替换为：apiKey: "sk-xxx",
-      apiKey: 'sk-839c413f949049918615290813173f2f',
-      baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+      apiKey: requireDashscopeApiKey(),
+      baseURL: DASHSCOPE_COMPATIBLE_BASE_URL,
     });
   }
 
