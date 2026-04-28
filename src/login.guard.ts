@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 
 interface JwtUserData {
   userId: number;
-  username: string;
+  userName: string;
   nickName: string;
 }
 
@@ -56,11 +56,11 @@ export class LoginGuard implements CanActivate {
     }
 
     try {
-      const token = authorization;
-      console.log(token, 'data');
+      const token = authorization.startsWith('Bearer ')
+        ? authorization.slice(7)
+        : authorization;
 
       const data = this.jwtService.verify<JwtUserData>(token);
-      console.log(data, 'data');
       request.user = {
         ...data,
       };

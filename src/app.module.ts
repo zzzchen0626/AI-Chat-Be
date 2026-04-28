@@ -20,14 +20,16 @@ import { AiModule } from './ai/ai.module';
 import { AgentModule } from './agent/agent.module';
 // import { Agent } from './agent/entities/agent.entity';
 
+// import 导入模块;providers,注册服务;controllers,注册控制器;exports,导出模块
+// JwtModule 是 @nestjs/jwt 提供的模块，专门用于处理 JWT 的签名、验签等功能。
 @Module({
   imports: [
     JwtModule.registerAsync({
       global: true,
       useFactory: () => ({
-        secret: 'fishThing',
+        secret: 'fishThing-access',
         signOptions: {
-          expiresIn: '7d',
+          expiresIn: '15m',
         },
       }),
     }),
@@ -43,6 +45,7 @@ import { AgentModule } from './agent/agent.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
+        charset: 'utf8mb4',
         synchronize: false,
         entities: [User, Chat, Message, FileEntity], // 添加Agent实体
       }),
@@ -57,6 +60,7 @@ import { AgentModule } from './agent/agent.module';
     AgentModule,
   ],
   controllers: [AppController],
+  // 把 LoginGuard 注册成全局守卫
   providers: [
     AppService,
     {

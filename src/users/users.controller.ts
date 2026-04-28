@@ -1,5 +1,15 @@
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  Inject,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Controller, Post, Body, Get, Query, Inject } from '@nestjs/common';
+import type { Request, Response } from 'express';
 
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -22,6 +32,41 @@ export class UsersController {
   @Inject(JwtService)
   private jwtService: JwtService;
 
+  private buildAccessToken(userInfo: {
+    id: number;
+    userName: string;
+    nickName: string;
+  }) {
+    return this.jwtService.sign(
+      {
+        userName: userInfo.userName,
+        nickName: userInfo.nickName,
+        userId: userInfo.id,
+      },
+      {
+        expiresIn: '15m',
+      },
+    );
+  }
+
+  private buildRefreshToken(userInfo: {
+    id: number;
+    userName: string;
+    nickName: string;
+  }) {
+    return this.jwtService.sign(
+      {
+        userName: userInfo.userName,
+        nickName: userInfo.nickName,
+        userId: userInfo.id,
+        tokenType: 'refresh',
+      },
+      {
+        expiresIn: '7d',
+      },
+    );
+  }
+
   @Post('register')
   async register(@Body() registerUserDto: RegisterUserDto) {
     return await this.usersService.register(registerUserDto);
@@ -43,28 +88,85 @@ export class UsersController {
   }
 
   @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto) {
+  async login(
+    @Body() loginUserDto: LoginUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const userInfo = await this.usersService.login(loginUserDto);
-    const { userName, nickName } = userInfo;
-    const needReturnLoginInfo = {
-      userName,
-      nickName,
-      token: '',
-    };
-    const token = this.jwtService.sign(
-      {
-        userName,
-        nickName,
-        userId: userInfo.id,
-      },
-      {
-        expiresIn: '7d',
-      },
-    );
-    needReturnLoginInfo.token = token;
+    const accessToken = this.buildAccessToken(userInfo);
+    const refreshToken = this.buildRefreshToken(userInfo);
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/users',
+    });
+
     return {
       message: '登录成功',
-      data: needReturnLoginInfo,
+      data: {
+        userName: userInfo.userName,
+        nickName: userInfo.nickName,
+        token: accessToken,
+      },
+    };
+  }
+
+  @Post('refresh-token')
+  async refreshToken(@Req() req: Request) {
+    const token = req.cookies?.refresh_token as string | undefined;
+
+    if (!token) {
+      return {
+        message: 'refresh token 缺失',
+        data: {},
+      };
+    }
+
+    const payload = this.jwtService.verify<{
+      userName: string;
+      nickName: string;
+      userId: number;
+      tokenType?: string;
+    }>(token);
+
+    if (payload.tokenType !== 'refresh') {
+      return {
+        message: 'refresh token 无效',
+        data: {},
+      };
+    }
+
+    const accessToken = this.jwtService.sign(
+      {
+        userName: payload.userName,
+        nickName: payload.nickName,
+        userId: payload.userId,
+      },
+      {
+        expiresIn: '15m',
+      },
+    );
+
+    return {
+      message: '刷新成功',
+      data: {
+        token: accessToken,
+      },
+    };
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('refresh_token', {
+      path: '/users',
+    });
+
+    return {
+      message: '退出成功',
+      data: {},
     };
   }
 }

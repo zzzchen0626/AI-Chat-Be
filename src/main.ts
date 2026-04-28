@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import {
@@ -31,9 +32,15 @@ async function bootstrap() {
   // 全局异常过滤器
   app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
 
-  // 跨域
-  app.enableCors();
+  // 接入 cookieParser
+  app.use(cookieParser());
+
+  // 启动跨域配置
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
 
-bootstrap();
+void bootstrap();
