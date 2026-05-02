@@ -81,7 +81,12 @@ export class AiService {
     return [messageContent, imgContent];
   }
 
-  async getMain(message: string, filePath: string, imgUrl?: string[]) {
+  async getMain(
+    message: string,
+    filePath: string,
+    imgUrl?: string[],
+    signal?: AbortSignal,
+  ) {
     const isImage = isImageByExtension(filePath);
     const model = isImage ? 'qwen-vl-plus' : 'qwen-long';
 
@@ -92,18 +97,21 @@ export class AiService {
     const userContent = isImage
       ? this.getAiWithImg(message, filePath)
       : message;
-
-    const completion = await this.openai.chat.completions.create({
-      model: model,
-      messages: [
-        { role: 'system', content: content },
-        { role: 'user', content: userContent },
-      ],
-      stream: true,
-      stream_options: {
-        include_usage: true,
+    // 增加主动取消
+    const completion = await this.openai.chat.completions.create(
+      {
+        model: model,
+        messages: [
+          { role: 'system', content: content },
+          { role: 'user', content: userContent },
+        ],
+        stream: true,
+        stream_options: {
+          include_usage: true,
+        },
       },
-    });
+      signal ? { signal } : undefined,
+    );
 
     return completion;
   }

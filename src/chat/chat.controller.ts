@@ -154,4 +154,18 @@ export class ChatController {
       data: {},
     };
   }
+
+  // 用户侧主动断流
+  @Post('cancelMessage')
+  async cancelMessage(@Body() body: { id: string }) {
+    if (!body.id) {
+      throw new HttpException('缺少必要参数：chatId', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.chatService.cancelChatGeneration(body.id);
+    return {
+      msg: '取消请求已发送',
+      data: {},
+    };
+  }
 }

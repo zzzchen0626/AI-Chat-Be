@@ -19,10 +19,13 @@ import { FileService } from 'src/file/file.service';
 import { UpdateTitleDto } from './dto/update-title.dto';
 import { SearchChatDto } from './dto/search-chat.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import { log } from 'console';
 
 @Injectable()
 export class ChatService {
   private chatSubjects = new Map<string, Subject<MessageEvent>>();
+  private chatAbortControllers = new Map<string, AbortController>();
+  private chatPartialContents = new Map<string, string>();
 
   private logger = new Logger();
 
@@ -65,7 +68,20 @@ export class ChatService {
     }
   }
 
+  async cancelChatGeneration(chatId: string) {
+    const controller = this.chatAbortControllers.get(chatId);
+    if (controller) {
+      this.logger.log('收到取消请求', chatId);
+      controller.abort();
+      this.logger.log('主动中断LLM生成', chatId);
+    }
+  }
+
   async useGeminiToChat({ id, message, imgUrl, fileId }: SendMessageDto) {
+    const controller = new AbortController();
+    this.chatAbortControllers.set(id, controller);
+    this.chatPartialContents.set(id, '');
+
     try {
       let filePath = '';
       const fileContent: FileContent[] = [];
@@ -97,13 +113,22 @@ export class ChatService {
         message,
         filePath,
         imgUrl,
+        controller.signal,
       );
 
       let fullContent = '';
+      let isCancelled = false;
+
       for await (const chunk of completion) {
+        if (controller.signal.aborted) {
+          isCancelled = true;
+          break;
+        }
+
         if (Array.isArray(chunk.choices) && chunk.choices.length > 0) {
           const content = chunk.choices[0].delta.content || '';
           fullContent += content;
+          this.chatPartialContents.set(id, fullContent);
 
           // 通过SSE发送每个块到前端
           this.sendMessageToChat(id, {
@@ -114,14 +139,16 @@ export class ChatService {
         }
       }
 
+      const finalContent = this.chatPartialContents.get(id) || fullContent;
+      await this.saveMessage(id, finalContent, MessageRole.SYSTEM);
+      this.logger.log('消息保存到数据库', finalContent);
       // 发送完整内容和完成标志
       this.sendMessageToChat(id, {
         type: 'complete',
-        content: fullContent,
+        content: finalContent,
         isComplete: true,
+        isCancelled,
       });
-
-      await this.saveMessage(id, fullContent, MessageRole.SYSTEM); // 保存AI的响应到数据库
 
       this.logger.log(`聊天 ${id} 的完整响应已发送`);
     } catch (error) {
@@ -142,6 +169,9 @@ export class ChatService {
         `聊天出错: ${error || '未知错误'}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    } finally {
+      this.chatAbortControllers.delete(id);
+      this.chatPartialContents.delete(id);
     }
   }
 
