@@ -13,7 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FileContent, Message, MessageRole } from './entities/message.entity';
 import { Chat } from './entities/chat.entity';
 
-import { AiService } from 'src/ai/ai.service';
+import { AiService } from 'src/agent/ai/ai.service';
 import { FileService } from 'src/file/file.service';
 
 import { UpdateTitleDto } from './dto/update-title.dto';

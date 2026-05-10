@@ -16,7 +16,7 @@ import { Chat } from './chat/entities/chat.entity';
 import { Message } from './chat/entities/message.entity';
 import { FileModule } from './file/file.module';
 import { FileEntity } from './file/entities/file.entity';
-import { AiModule } from './ai/ai.module';
+import { AiModule } from './agent/ai/ai.module';
 import { AgentModule } from './agent/agent.module';
 // import { Agent } from './agent/entities/agent.entity';
 
