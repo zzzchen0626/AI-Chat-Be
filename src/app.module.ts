@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -38,17 +38,34 @@ import { AgentModule } from './agent/agent.module';
       envFilePath: 'src/.env',
     }),
     TypeOrmModule.forRootAsync({
-      useFactory: (configService: ConfigService): MysqlConnectionOptions => ({
-        type: 'mysql',
-        host: configService.get('DB_HOST'),
-        port: configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
-        charset: 'utf8mb4',
-        synchronize: false,
-        entities: [User, Chat, Message, FileEntity], // 添加Agent实体
-      }),
+      useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
+        const databaseUrl = configService.get<string>('DATABASE_URL');
+        const entities = [User, Chat, Message, FileEntity];
+
+        if (databaseUrl) {
+          return {
+            type: 'postgres',
+            url: databaseUrl,
+            ssl: {
+              rejectUnauthorized: false,
+            },
+            synchronize: false,
+            entities,
+          };
+        }
+
+        return {
+          type: 'mysql',
+          host: configService.get<string>('DB_HOST'),
+          port: configService.get<number>('DB_PORT'),
+          username: configService.get<string>('DB_USERNAME'),
+          password: configService.get<string>('DB_PASSWORD'),
+          database: configService.get<string>('DB_DATABASE'),
+          charset: 'utf8mb4',
+          synchronize: false,
+          entities, // 添加Agent实体
+        };
+      },
       inject: [ConfigService],
     }),
     UsersModule,

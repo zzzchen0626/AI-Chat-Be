@@ -36,8 +36,12 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // 启动跨域配置
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: true,
+    origin: corsOrigins?.length ? corsOrigins : true,
     credentials: true,
   });
   await app.listen(process.env.PORT ?? 3000);
