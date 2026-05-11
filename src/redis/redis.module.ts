@@ -11,13 +11,18 @@ import { ConfigService } from '@nestjs/config';
     {
       provide: 'REDIS_CLIENT',
       async useFactory(configService: ConfigService) {
-        const redisClient = createClient({
-          socket: {
-            host: configService.get('redis_server_host'),
-            port: configService.get('redis_server_port'),
-          },
-          database: configService.get('redis_server_db'),
-        });
+        const redisUrl = configService.get<string>('REDIS_URL');
+
+        const redisClient = redisUrl
+          ? createClient({ url: redisUrl })
+          : createClient({
+              socket: {
+                host: configService.get('redis_server_host'),
+                port: configService.get('redis_server_port'),
+              },
+              database: configService.get('redis_server_db'),
+            });
+
         await redisClient.connect();
 
         return redisClient;
