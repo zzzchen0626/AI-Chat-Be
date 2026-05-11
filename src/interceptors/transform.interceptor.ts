@@ -10,9 +10,10 @@ import { ResponseResult } from '../interfaces/response.interface';
 
 // 响应拦截器
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, ResponseResult<T>>
-{
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ResponseResult<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,

@@ -37,7 +37,7 @@ export class FileController {
   uploadFile(@Body() uploadFileDto: UploadFileDto, @UploadedFile() file: any) {
     return this.fileService.uploadFile({
       ...uploadFileDto,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       chunk: file,
     });
   }

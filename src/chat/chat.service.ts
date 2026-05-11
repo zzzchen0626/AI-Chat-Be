@@ -19,7 +19,6 @@ import { FileService } from 'src/file/file.service';
 import { UpdateTitleDto } from './dto/update-title.dto';
 import { SearchChatDto } from './dto/search-chat.dto';
 import { SendMessageDto } from './dto/send-message.dto';
-import { log } from 'console';
 
 @Injectable()
 export class ChatService {
@@ -60,7 +59,6 @@ export class ChatService {
       const subject = this.chatSubjects.get(chatId);
       subject?.next(
         new MessageEvent('message', {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: message,
           lastEventId: String(Date.now()), // 对应 id
         }),

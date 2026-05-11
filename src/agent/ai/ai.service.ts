@@ -48,7 +48,7 @@ export class AiService {
 
     const fileObject = await this.openai.files.create({
       file: fs.createReadStream(localFilePath),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       purpose: 'file-extract' as any,
     });
 

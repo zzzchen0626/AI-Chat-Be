@@ -8,7 +8,10 @@ import { Runnable } from '@langchain/core/runnables';
 import { AgentType } from './entities/agent.entity';
 import { GenerateContentDto } from './dto/create-agent.dto';
 import { ChainValues } from '@langchain/core/utils/types';
-import { DASHSCOPE_COMPATIBLE_BASE_URL, requireDashscopeApiKey } from 'src/dashscope-config';
+import {
+  DASHSCOPE_COMPATIBLE_BASE_URL,
+  requireDashscopeApiKey,
+} from 'src/dashscope-config';
 import { MbtiService } from './services/mbti.service';
 
 @Injectable()

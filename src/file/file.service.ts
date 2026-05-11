@@ -129,7 +129,6 @@ export class FileService {
   async uploadFile(uploadFileDto: UploadFileDto) {
     const { fileId, index, chunkHash } = uploadFileDto;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const chunk = uploadFileDto.chunk;
 
     // 获取文件记录
@@ -147,7 +146,7 @@ export class FileService {
     // 保存切片文件
     const chunkPath = path.join(chunkDir, `${index}`);
     // 验证切片哈希
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
     const buffer = chunk.buffer;
     const calculatedHash = this.calculateHash(buffer);
 

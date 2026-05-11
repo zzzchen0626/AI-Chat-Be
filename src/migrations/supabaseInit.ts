@@ -114,9 +114,15 @@ export class InitSupabaseSchema1710000000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "file_entity" DROP CONSTRAINT IF EXISTS "FK_file_entity_chatId"`);
-    await queryRunner.query(`ALTER TABLE "message" DROP CONSTRAINT IF EXISTS "FK_message_chatId"`);
-    await queryRunner.query(`ALTER TABLE "chat" DROP CONSTRAINT IF EXISTS "FK_chat_userId"`);
+    await queryRunner.query(
+      `ALTER TABLE "file_entity" DROP CONSTRAINT IF EXISTS "FK_file_entity_chatId"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "message" DROP CONSTRAINT IF EXISTS "FK_message_chatId"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "chat" DROP CONSTRAINT IF EXISTS "FK_chat_userId"`,
+    );
 
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_file_entity_chatId"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "IDX_message_chatId"`);

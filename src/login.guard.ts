@@ -39,7 +39,7 @@ export class LoginGuard implements CanActivate {
     const request: Request = context.switchToHttp().getRequest();
 
     // 使用reflector的目的是从目标controller和handler上拿到require-login的metadata
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const requireLogin = this.reflector.getAllAndOverride('require-login', [
       context.getClass(),
       context.getHandler(),

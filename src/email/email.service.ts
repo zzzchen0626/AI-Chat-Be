@@ -7,7 +7,6 @@ export class EmailService {
   transporter: Transporter;
 
   constructor(private configService: ConfigService) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     this.transporter = createTransport({
       host: this.configService.get<string>('nodemailer_host'),
       port: this.configService.get<number>('nodemailer_port'),
@@ -47,7 +46,6 @@ export class EmailService {
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       await this.transporter.sendMail({
         from: {
           name: fromName,
