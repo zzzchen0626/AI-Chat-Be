@@ -19,7 +19,6 @@ import { FileService } from 'src/file/file.service';
 import { UpdateTitleDto } from './dto/update-title.dto';
 import { SearchChatDto } from './dto/search-chat.dto';
 import { SendMessageDto } from './dto/send-message.dto';
-import { log } from 'console';
 
 @Injectable()
 export class ChatService {
